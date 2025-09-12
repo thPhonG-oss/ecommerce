@@ -45,7 +45,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public ApiResponse<?> addProductToCart(Long productId, Integer quantity){
+    public CartDTO addProductToCart(Long productId, Integer quantity){
         // first, find existing cart of current user or creating one.
         Cart cart = createCartUser();
         //  retrieve product details
@@ -79,11 +79,7 @@ public class CartServiceImpl implements CartService {
         cart.getCartItems().add(savedCartItem);
         cart.setTotalPrice(cart.getTotalPrice() + (cartItemToAdd.getProductPrice() * quantity));
         cartRepository.save(cart);
-        return ApiResponse.builder()
-            .status(HttpStatus.CREATED.toString())
-            .message("Added product to your Cart.")
-            .response(cartMapper.toCartDTO(cart))
-            .build();
+        return cartMapper.toCartDTO(cart);
     }
 
     @Override
@@ -99,7 +95,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public ApiResponse<?> findAllCarts(){
+    public List<CartDTO> findAllCarts(){
         List<Cart> carts = cartRepository.findAll();
         if(carts.isEmpty()){
             throw new APIException("No cart exists.");
@@ -109,22 +105,15 @@ public class CartServiceImpl implements CartService {
             CartDTO cartDTO = cartMapper.toCartDTO(cart);
             cartDTOs.add(cartDTO);
         });
-        return ApiResponse.builder()
-            .status(HttpStatus.OK.toString())
-            .message("Found " + cartDTOs.size() + " cart(s).")
-            .response(cartDTOs)
-            .build();
+        return cartDTOs;
     }
 
     @Override
-    public ApiResponse<?> getCartOfTheSpecificUserEmail(){
+    public CartDTO getCartOfTheSpecificUserEmail(){
         Cart cart = cartRepository.findCartByUseremail(authUtils.loggedInEmail())
             .orElseThrow(() -> new ResourcesNotFoundException("Cart", "user email", authUtils.loggedInEmail()));
 
-        return ApiResponse.builder()
-            .status(HttpStatus.OK.toString())
-            .response(cartMapper.toCartDTO(cart))
-            .build();
+        return cartMapper.toCartDTO(cart);
     }
 
 //    @Override
@@ -146,7 +135,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
-    public ApiResponse<?> updateProductQuantityInCart(Long productId, Integer quantity) {
+    public CartDTO updateProductQuantityInCart(Long productId, Integer quantity) {
         String email = authUtils.loggedInEmail();
 
         Cart cart = cartRepository.findCartByEmail(email);
@@ -189,16 +178,12 @@ public class CartServiceImpl implements CartService {
 
         cartRepository.save(cart);
 
-        return ApiResponse.builder()
-            .status(HttpStatus.OK.toString())
-            .message("Updated product to your Cart.")
-            .response(cartMapper.toCartDTO(cart))
-            .build();
+        return cartMapper.toCartDTO(cart);
     }
 
     @Override
     @Transactional
-    public ApiResponse<?> deleteItemInCart(Long cartId, Long productId){
+    public CartDTO deleteItemInCart(Long cartId, Long productId){
         Cart cart = cartRepository.findById(cartId)
             .orElseThrow(() -> new ResourcesNotFoundException("Cart", "id", cartId));
 
@@ -216,11 +201,7 @@ public class CartServiceImpl implements CartService {
             cartRepository.save(cart);
         }
 
-        return ApiResponse.builder()
-            .status(HttpStatus.OK.toString())
-            .message("Deleted product from your Cart successfully.")
-            .response(cartMapper.toCartDTO(cart))
-            .build();
+        return cartMapper.toCartDTO(cart);
     }
 
     @Override
