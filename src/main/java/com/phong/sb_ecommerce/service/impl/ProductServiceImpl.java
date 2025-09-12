@@ -4,12 +4,16 @@ import com.phong.sb_ecommerce.exception.APIException;
 import com.phong.sb_ecommerce.exception.ResourcesAlreadyExistException;
 import com.phong.sb_ecommerce.exception.ResourcesNotFoundException;
 import com.phong.sb_ecommerce.mapper.ProductMapper;
+import com.phong.sb_ecommerce.model.Cart;
 import com.phong.sb_ecommerce.model.Category;
 import com.phong.sb_ecommerce.model.Product;
 import com.phong.sb_ecommerce.payload.request.ProductDTO;
 import com.phong.sb_ecommerce.payload.response.ProductResponse;
+import com.phong.sb_ecommerce.repository.CartItemRepository;
+import com.phong.sb_ecommerce.repository.CartRepository;
 import com.phong.sb_ecommerce.repository.CategoryRepository;
 import com.phong.sb_ecommerce.repository.ProductRepository;
+import com.phong.sb_ecommerce.service.CartService;
 import com.phong.sb_ecommerce.service.FileService;
 import com.phong.sb_ecommerce.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,6 +48,15 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private CartItemRepository cartItemRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    @Autowired
+    private CartService cartService;
 
 
     @Value("${project.images}")
@@ -181,6 +194,12 @@ public class ProductServiceImpl implements ProductService {
 
         existingProduct.setSpecialPrice((100 - productDTO.getDiscount()) * 0.01 * productDTO.getPrice());
 
+        List<Cart> carts = cartRepository.findCartByProductId(existingProduct.getProductId());
+
+        carts.forEach(cart -> {
+            cartService.updateItemInCart(cart.getCartId(), existingProduct.getProductId());
+        });
+
         Product updatedProduct = productRepository.save(existingProduct);
 
         return productMapper.toProductDTO(updatedProduct);
@@ -191,7 +210,13 @@ public class ProductServiceImpl implements ProductService {
         Product existingProduct = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourcesNotFoundException("Product", "product id", productId));
 
+        List<Cart> carts = cartRepository.findCartByProductId(existingProduct.getProductId());
+        carts.forEach(cart -> {
+            cartService.deleteItemInCart(cart.getCartId(), existingProduct.getProductId());
+        });
+
         productRepository.delete(existingProduct);
+        
         return "Delete successfully!";
     }
 

@@ -2,11 +2,13 @@ package com.phong.sb_ecommerce.service.impl;
 
 import com.phong.sb_ecommerce.exception.APIException;
 import com.phong.sb_ecommerce.exception.ResourcesNotFoundException;
+import com.phong.sb_ecommerce.mapper.CartItemMapper;
 import com.phong.sb_ecommerce.mapper.CartMapperImpl;
 import com.phong.sb_ecommerce.model.Cart;
 import com.phong.sb_ecommerce.model.CartItem;
 import com.phong.sb_ecommerce.model.Product;
 import com.phong.sb_ecommerce.payload.dto.CartDTO;
+import com.phong.sb_ecommerce.payload.dto.CartItemDTO;
 import com.phong.sb_ecommerce.payload.response.ApiResponse;
 import com.phong.sb_ecommerce.repository.CartItemRepository;
 import com.phong.sb_ecommerce.repository.CartRepository;
@@ -32,6 +34,9 @@ public class CartServiceImpl implements CartService {
 
     @Autowired
     private CartMapperImpl cartMapper;
+
+    @Autowired
+    private CartItemMapper cartItemMapper;
 
     public CartServiceImpl(CartRepository cartRepository, ProductRepository productRepository, CartItemRepository cartItemRepository) {
         this.cartRepository = cartRepository;
@@ -167,6 +172,11 @@ public class CartServiceImpl implements CartService {
             throw new ResourcesNotFoundException("Item", "name", product.getProductName());
         }
 
+        int newQuantity = cartItem.getQuantity() + quantity;
+        if(newQuantity < 0){
+            throw new APIException("The resulting quantity can not be negative.");
+        }
+
         cartItem.setQuantity(cartItem.getQuantity() + quantity);
         CartItem updatedCartItem = cartItemRepository.save(cartItem);
 
@@ -187,6 +197,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional
     public ApiResponse<?> deleteItemInCart(Long cartId, Long productId){
         Cart cart = cartRepository.findById(cartId)
             .orElseThrow(() -> new ResourcesNotFoundException("Cart", "id", cartId));
@@ -195,6 +206,7 @@ public class CartServiceImpl implements CartService {
             .orElseThrow(() -> new ResourcesNotFoundException("Product", "id", productId));
 
         CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
+
         if(cartItem == null){
             throw new ResourcesNotFoundException("Item", "name", product.getProductName() + "in your cart.");
         } else {
@@ -209,6 +221,37 @@ public class CartServiceImpl implements CartService {
             .message("Deleted product from your Cart successfully.")
             .response(cartMapper.toCartDTO(cart))
             .build();
+    }
+
+    @Override
+    public CartItemDTO updateItemInCart(Long cartId, Long productId) {
+        Cart cart = cartRepository.findById(cartId)
+            .orElseThrow(() -> new ResourcesNotFoundException("Cart", "id", cartId));
+
+        Product product = productRepository.findById(productId)
+            .orElseThrow(() -> new ResourcesNotFoundException("Product", "id", productId));
+
+        CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
+
+        if(cartItem == null){
+            throw new ResourcesNotFoundException("Item", "name", product.getProductName() + "in your cart.");
+        }
+
+        if(cartItem.getQuantity() > product.getQuantity()){
+            throw new APIException("Please make order of the " + product.getProductName() + " less than or equal to " + product.getQuantity() + ".");
+        }
+
+        cart.setTotalPrice(cart.getTotalPrice() - (cartItem.getProductPrice() * cartItem.getQuantity()));
+
+        cartItem.setProductPrice(product.getSpecialPrice());
+        cartItem.setDiscount(product.getDiscount());
+
+        CartItem updatedCartItem = cartItemRepository.save(cartItem);
+
+        cart.setTotalPrice(cart.getTotalPrice() + (updatedCartItem.getProductPrice() * cartItem.getQuantity()));
+        cartRepository.save(cart);
+
+        return cartItemMapper.toCartItemDTO(updatedCartItem);
     }
 
 }

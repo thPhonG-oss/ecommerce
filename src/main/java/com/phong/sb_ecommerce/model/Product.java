@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Getter
@@ -41,5 +42,5 @@ public class Product {
         cascade = {CascadeType.PERSIST, CascadeType.MERGE},
         orphanRemoval = true
     )
-    List<CartItem> cartItems;
+    List<CartItem> cartItems = new ArrayList<>();
 }
