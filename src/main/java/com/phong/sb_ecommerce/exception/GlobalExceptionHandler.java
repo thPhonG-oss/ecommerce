@@ -88,4 +88,16 @@ public class GlobalExceptionHandler {
             .build(),
             HttpStatus.FORBIDDEN);
     }
+
+    @ExceptionHandler(value = {AppException.class})
+    public ResponseEntity<ErrorResponse<?>> handleAppException(AppException e){
+        ErrorCode errorCode = e.getErrorCode();
+
+        return ResponseEntity.badRequest().body(
+            ErrorResponse.builder()
+                .code(errorCode.getCode())
+                .message(errorCode.getMessage())
+                .build()
+        );
+    }
 }
