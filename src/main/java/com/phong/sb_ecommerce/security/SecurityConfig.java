@@ -48,7 +48,7 @@ public class SecurityConfig {
         "/api/test/**",
         "/favicon.ico",
         "/error/**",
-        };
+    };
 
 
     @Autowired
@@ -93,8 +93,8 @@ public class SecurityConfig {
             })
             .authorizeHttpRequests(authorizeRequests -> {
                 authorizeRequests.requestMatchers(AUTH_WHITELIST).permitAll()
-                .anyRequest().authenticated();
-        });
+                    .anyRequest().authenticated();
+            });
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

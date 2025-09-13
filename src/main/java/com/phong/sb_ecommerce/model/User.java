@@ -51,13 +51,10 @@ public class User {
     )
     Set<Role> roles = new HashSet<>();
 
-    @ManyToMany(fetch = FetchType.LAZY
-            , cascade = {CascadeType.PERSIST, CascadeType.MERGE}
-    )
-    @JoinTable(
-            name = "user_address",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "address_id")
+    @OneToMany(fetch = FetchType.LAZY,
+            mappedBy = "user"
+            , cascade = {CascadeType.PERSIST, CascadeType.MERGE},
+            orphanRemoval = true
     )
     List<Address> addresses = new ArrayList<>();
 
