@@ -4,11 +4,16 @@ import com.phong.sb_ecommerce.payload.request.UserUpdateRequestDTO;
 import com.phong.sb_ecommerce.payload.response.ApiResponse;
 import com.phong.sb_ecommerce.repository.UserRepository;
 import com.phong.sb_ecommerce.service.UserService;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.aspectj.lang.annotation.DeclareError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+@Tag(name = "User", description = "Operations related to user management.")
 @RestController
 @RequestMapping("/api/admin")
 public class UserController {
