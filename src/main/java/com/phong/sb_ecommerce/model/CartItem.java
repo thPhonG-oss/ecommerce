@@ -21,6 +21,7 @@ public class CartItem {
 
     @ManyToOne
     @JoinColumn(name = "cart_id")
+    @ToString.Exclude
     Cart cart;
 
     @ManyToOne // fetch type default is eager

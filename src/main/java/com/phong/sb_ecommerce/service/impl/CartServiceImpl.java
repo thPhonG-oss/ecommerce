@@ -193,7 +193,7 @@ public class CartServiceImpl implements CartService {
         CartItem cartItem = cartItemRepository.findCartItemByProductIdAndCartId(cartId, productId);
 
         if(cartItem == null){
-            throw new ResourcesNotFoundException("Item", "name", product.getProductName() + "in your cart.");
+            throw new ResourcesNotFoundException("Item", "name", product.getProductName() + " in your cart.");
         } else {
             cart.getCartItems().remove(cartItem);
             cart.setTotalPrice(cart.getTotalPrice() - (cartItem.getProductPrice() * cartItem.getQuantity()));

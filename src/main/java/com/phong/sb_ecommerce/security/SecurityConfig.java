@@ -39,10 +39,6 @@ import java.util.Set;
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
     private final String[] AUTH_WHITELIST = {"/api/public/**",
-        "/v3/api-docs",
-        "/swagger-resources/**",
-        "/webjars/**",
-        "/swagger-ui/**",
         "/h2-console/**",
         "/api/auth/**",
         "/api/test/**",
@@ -109,10 +105,13 @@ public class SecurityConfig {
         return (webSecurity -> {
             webSecurity.ignoring().requestMatchers(
                 "/v3/api-docs",
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html",
                 "/configuration/ui",
                 "/swagger-resources/**",
+                "/swagger-resources",
                 "/configuration/security",
-                "/swagger-ui.html",
                 "/webjars/**",
                 "/h2-console/**",
                 "/favicon.ico"

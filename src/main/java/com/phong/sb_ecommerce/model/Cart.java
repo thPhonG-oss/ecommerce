@@ -27,6 +27,7 @@ public class Cart {
     @JoinColumn(name = "user_id")
     User cartUser;
 
+    @ToString.Exclude
     @OneToMany(
         fetch = FetchType.EAGER, // I want to load all cart items when fetching cart
         mappedBy = "cart",

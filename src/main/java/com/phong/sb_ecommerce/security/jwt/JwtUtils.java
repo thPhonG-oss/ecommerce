@@ -29,7 +29,7 @@ public class JwtUtils {
 
 
     // getting token from header
-    public String jwtTokenFromHeader(HttpServletRequest request) {
+    public String getJwtTokenFromHeader(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             return authHeader.substring(7);

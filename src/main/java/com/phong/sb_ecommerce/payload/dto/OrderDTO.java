@@ -19,8 +19,8 @@ public class OrderDTO {
     String email;
     List<OrderItemDTO> orderItems = new ArrayList<>();
     LocalDate orderDate;
-    PaymentDTO payment;
     Double tolalAmount;
     String orderStatus;
     Long addressId;
+    PaymentDTO payment;
 }
